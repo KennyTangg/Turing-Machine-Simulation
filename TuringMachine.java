@@ -75,6 +75,37 @@ public class TuringMachine {
         TuringMachine TM = new TuringMachine(tape, transition, 0, "A", "q_accept");
         TM.tapeProcess();
 
+        String tape2 = "111000";
+        Map<String, Map<String,List<String>>> transition2 = new HashMap<>();
+        
+        Map<String,List<String>> q0 = new HashMap<>();
+        q0.put("0", Arrays.asList("q_reject","0","R"));
+        q0.put("1", Arrays.asList("q1","X","R"));
+        q0.put("Y", Arrays.asList("q3","Y","R"));
+        q0.put("_", Arrays.asList("q3","_","L"));
+        
+        Map<String,List<String>> q1 = new HashMap<>();
+        q1.put("0", Arrays.asList("q2","Y","L"));
+        q1.put("1", Arrays.asList("q1","1","R"));
+        q1.put("Y", Arrays.asList("q1","Y","R"));
+        
+        Map<String,List<String>> q2 = new HashMap<>();
+        q2.put("1", Arrays.asList("q2","1","L"));
+        q2.put("Y", Arrays.asList("q2","Y","L"));
+        q2.put("X", Arrays.asList("q0","X","R"));
+        
+        Map<String,List<String>> q3 = new HashMap<>();
+        q3.put("Y", Arrays.asList("q3","Y","R"));
+        q3.put("_", Arrays.asList("q_accept","_","L"));
+
+        transition2.put("q0", q0);
+        transition2.put("q1", q1);
+        transition2.put("q2", q2);
+        transition2.put("q3", q3);
+
+        TuringMachine TM2 = new TuringMachine(tape2, transition2, 0, "q0", "q_accept");
+        TM2.tapeProcess();
+
     }
 
     public List<String> inputProcessing(){
