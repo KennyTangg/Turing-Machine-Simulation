@@ -13,7 +13,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import java.util.*;
 
-public class simulation extends Application {
+public class Simulation extends Application {
     private int cell_width = 80; 
     private int cell_height = 80; 
     private int cell_number = 50; 
