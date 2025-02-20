@@ -2,7 +2,6 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -11,12 +10,14 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import java.util.*;
 
-public class Simulation extends Application {
-    private int cell_width = 80; 
-    private int cell_height = 80; 
-    private int cell_number = 50; 
+public class simulation extends Application {
+    private final int cell_width = 80;
+    private int cell_height = 80;
+    private int cell_number = 50;
     int head_position = 0;
     String current_state = "q0";
     String accept_state = "q_accept";
@@ -28,30 +29,30 @@ public class Simulation extends Application {
     public static void main(String[] args){
         launch(args);
     }
-    
+
     @Override
     public void start(Stage stage) throws Exception{
         Group root = new Group();
         Scene scene = new Scene(root,1280,720, Color.LAVENDER);
         List<Text> inputTapeNodes = new ArrayList<>();
         Map<String, Map<String,List<String>>> transition = new HashMap<>();
-        
+
         Map<String,List<String>> q0 = new HashMap<>();
         q0.put("0", Arrays.asList("q_reject","0","R"));
         q0.put("1", Arrays.asList("q1","X","R"));
         q0.put("Y", Arrays.asList("q3","Y","R"));
         q0.put("_", Arrays.asList("q3","_","L"));
-        
+
         Map<String,List<String>> q1 = new HashMap<>();
         q1.put("0", Arrays.asList("q2","Y","L"));
         q1.put("1", Arrays.asList("q1","1","R"));
         q1.put("Y", Arrays.asList("q1","Y","R"));
-        
+
         Map<String,List<String>> q2 = new HashMap<>();
         q2.put("1", Arrays.asList("q2","1","L"));
         q2.put("Y", Arrays.asList("q2","Y","L"));
         q2.put("X", Arrays.asList("q0","X","R"));
-        
+
         Map<String,List<String>> q3 = new HashMap<>();
         q3.put("Y", Arrays.asList("q3","Y","R"));
         q3.put("_", Arrays.asList("q_accept","_","L"));
@@ -78,9 +79,9 @@ public class Simulation extends Application {
 
         Polygon triangle = new Polygon();
         triangle.getPoints().setAll(
-            25.0,150.0,
-            55.0,150.0,
-            40.0,175.0);
+                25.0,150.0,
+                55.0,150.0,
+                40.0,175.0);
         triangle.setFill(Color.GREY);
         triangle.setStroke(Color.BLACK);
 
@@ -103,23 +104,17 @@ public class Simulation extends Application {
 
         button.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
-                System.out.println("Left mouse button clicked on the rectangle!");
+                System.out.println("Left mouse button clicked on Start button !");
                 button.setFill(Color.LIGHTGREEN);
                 runTuringMachine(transition, root, inputTapeNodes);
-            } else if (event.getButton() == MouseButton.SECONDARY) {
-                System.out.println("Right mouse button clicked on the rectangle!");
-                button.setFill(Color.RED); // Change color on right-click
             }
         });
-        
+
         begin.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
-                System.out.println("Left mouse button clicked on the text!");
+                System.out.println("Left mouse button clicked on Start button !");
                 button.setFill(Color.LIGHTGREEN);
                 runTuringMachine(transition, root, inputTapeNodes);
-            } else if (event.getButton() == MouseButton.SECONDARY) {
-                System.out.println("Right mouse button clicked on the text!");
-                button.setFill(Color.RED); 
             }
         });
 
@@ -138,9 +133,6 @@ public class Simulation extends Application {
             inputTapeNodes.add(input_tape);
         }
 
-        Image icon = new Image("TM_icon.png");
-
-        stage.getIcons().add(icon);
         stage.setTitle("Turing Machine Simulation");
         stage.setWidth(1280);
         stage.setHeight(720);
@@ -155,53 +147,66 @@ public class Simulation extends Application {
         stage.show();
     }
 
-    public void runTuringMachine(Map<String, Map<String, List<String>>> transition, Group root, List<Text> inputTapeNodes){
+    public void runTuringMachine(Map<String, Map<String, List<String>>> transition, Group root, List<Text> inputTapeNodes) {
+        // Remove existing tape nodes and clear the list
+        root.getChildren().removeAll(inputTapeNodes);
+        inputTapeNodes.clear();
 
-        for (Text node : inputTapeNodes) {
-            root.getChildren().remove(node);
-        }
+        // Create a PauseTransition for the delay
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.3)); // 1 second delay
+        pause.setOnFinished(event -> {
+            try {
+                if (current_state.equals(accept_state)) {
+                    System.out.println("Input Accepted\n");
+                    return;
+                } else if (current_state.equals(reject_state)) {
+                    System.out.println("Input Rejected\n");
+                    return;
+                }
 
-        try {
-            while (true) {
                 String symbol = inputList.get(head_position);
-    
-                // New state as key with transition function as value
+                // Retrieve the transition for the current state and symbol
                 Map<String, List<String>> new_state = transition.get(current_state);
                 List<String> transitionList = new_state.get(symbol);
-    
+
+                // Update current state and tape symbol
                 current_state = transitionList.get(0);
                 inputList.set(head_position, transitionList.get(1));
                 if (transitionList.get(2).equalsIgnoreCase("R")) {
-                    head_position += 1;
+                    head_position++;
                 } else if (transitionList.get(2).equalsIgnoreCase("L")) {
-                    head_position -= 1;
+                    head_position--;
                 } else {
-                    System.out.println("Please input either R for right or L for Left ");
+                    System.out.println("Please input either R for right or L for left ");
                 }
-    
+
                 if (head_position >= inputList.size()) {
                     inputList.add(blank_symbol);
                 }
-    
-                System.out.println(inputList);
-                System.out.println("Head Position : " + head_position);
-                System.out.println("Current State : " + current_state);
-                if (current_state.equals(accept_state)) {
-                    System.out.println("Input Accepted\n");
-                    break;
-                } else if (current_state.equals(reject_state)) {
-                    System.out.println("Input Rejected\n");
-                    break;
-                } else {
-                    System.out.println("Running...\n");
-                    if (head_position == inputList.size() + 1) {
-                        System.out.println("Your Algorithm cannot Halt...\n");
-                        break;
-                    }
+
+                // Clear existing tape nodes from the UI and the list
+                root.getChildren().removeAll(inputTapeNodes);
+                inputTapeNodes.clear();
+
+                // Update the UI with the new tape content
+                for (int i = 0; i < inputList.size(); i++) {
+                    String newSymbol = inputList.get(i);
+                    Text input_tape = new Text(cell_width * i + 30, 250, newSymbol);
+                    input_tape.setFont(Font.font("Arial", 35));
+                    root.getChildren().add(input_tape);
+                    inputTapeNodes.add(input_tape);
                 }
+
+                // Continue the loop if not halted
+                if (!current_state.equals(accept_state) && !current_state.equals(reject_state)) {
+                    pause.playFromStart();
+                }
+            } catch (NullPointerException e) {
+                System.out.println("Input Rejected\n");
             }
-        } catch (NullPointerException e) {
-            System.out.println("Input Rejected\n");
-        }
+        });
+
+        // Start the first iteration
+        pause.play();
     }
 }
