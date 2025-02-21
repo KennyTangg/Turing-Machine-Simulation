@@ -26,6 +26,9 @@ public class simulation extends Application {
     String tape = "111000";
     List<String> inputList = new ArrayList<>(Arrays.asList(tape.split("")));
 
+    // Make the triangle a field so it can be updated later.
+    private Polygon triangle;
+
     public static void main(String[] args){
         launch(args);
     }
@@ -77,13 +80,14 @@ public class simulation extends Application {
         line.setStrokeWidth(2);
         line.setStroke(Color.GREY);
 
-        Polygon triangle = new Polygon();
+        triangle = new Polygon();
         triangle.getPoints().setAll(
-                25.0,150.0,
-                55.0,150.0,
-                40.0,175.0);
+                25.0, 150.0,
+                55.0, 150.0,
+                40.0, 175.0);
         triangle.setFill(Color.GREY);
         triangle.setStroke(Color.BLACK);
+        triangle.setTranslateX(0);
 
         Rectangle button = new Rectangle();
         button.setX(550);
@@ -196,6 +200,8 @@ public class simulation extends Application {
                     root.getChildren().add(input_tape);
                     inputTapeNodes.add(input_tape);
                 }
+
+                triangle.setTranslateX(head_position * cell_width);
 
                 // Continue the loop if not halted
                 if (!current_state.equals(accept_state) && !current_state.equals(reject_state)) {
