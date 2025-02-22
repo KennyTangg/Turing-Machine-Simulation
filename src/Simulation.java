@@ -1,3 +1,4 @@
+// importing libraries
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Group;
@@ -14,57 +15,68 @@ import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import java.util.*;
 
-public class simulation extends Application {
+public class Simulation extends Application {
+    // Attributes for Simulation class
     private final int cell_width = 80;
-    private int cell_height = 80;
-    private int cell_number = 50;
-    int head_position = 0;
-    String current_state = "q0";
-    String accept_state = "q_accept";
-    String reject_state = "q_reject";
-    String blank_symbol = "_";
-    String tape = "111000";
-    List<String> inputList = new ArrayList<>(Arrays.asList(tape.split("")));
-
-    // Make the triangle a field so it can be updated later.
+    private final String accept_state = "q_accept";
+    private final String reject_state = "q_reject";
+    private final String blank_symbol = "_";
+    private final String tape = "111000";
+    private final List<String> inputList = new ArrayList<>(Arrays.asList(tape.split("")));
+    private int head_position = 0;
+    private String current_state = "q0";
     private Polygon triangle;
 
     public static void main(String[] args){
+        // Launch JavaFX Application
         launch(args);
     }
 
     @Override
     public void start(Stage stage) throws Exception{
+        // Create a Group object to add UI components
         Group root = new Group();
         Scene scene = new Scene(root,1280,720, Color.LAVENDER);
         List<Text> inputTapeNodes = new ArrayList<>();
         Map<String, Map<String,List<String>>> transition = new HashMap<>();
 
+        /* Create a Turing Machine transition with these rules
+        Map < "What the current state is ", Map < "the input symbol the tape head read at the current state",
+        List < "the next state the current state will go to", "the tape will write this symbol",
+        "Move to left or right using 'L' or 'R' " > >
+        */
+
+        // Transition Rules for state q0
         Map<String,List<String>> q0 = new HashMap<>();
         q0.put("0", Arrays.asList("q_reject","0","R"));
         q0.put("1", Arrays.asList("q1","X","R"));
         q0.put("Y", Arrays.asList("q3","Y","R"));
         q0.put("_", Arrays.asList("q3","_","L"));
 
+        // Transition Rules for state q1
         Map<String,List<String>> q1 = new HashMap<>();
         q1.put("0", Arrays.asList("q2","Y","L"));
         q1.put("1", Arrays.asList("q1","1","R"));
         q1.put("Y", Arrays.asList("q1","Y","R"));
 
+        // Transition Rules for state q2
         Map<String,List<String>> q2 = new HashMap<>();
         q2.put("1", Arrays.asList("q2","1","L"));
         q2.put("Y", Arrays.asList("q2","Y","L"));
         q2.put("X", Arrays.asList("q0","X","R"));
 
+        // Transition Rules for state q3
         Map<String,List<String>> q3 = new HashMap<>();
         q3.put("Y", Arrays.asList("q3","Y","R"));
         q3.put("_", Arrays.asList("q_accept","_","L"));
 
+        // Add Transition Rules to transition map
         transition.put("q0", q0);
         transition.put("q1", q1);
         transition.put("q2", q2);
         transition.put("q3", q3);
 
+        // Create a Text Object for Title
         Text text = new Text();
         text.setText("Turing Machine Simulation");
         text.setX(340);
@@ -72,6 +84,7 @@ public class simulation extends Application {
         text.setFont(Font.font("Poppins",FontWeight.BOLD, 50));
         text.setFill(Color.GRAY);
 
+        // Create Line Object to give a horizontal line below title
         Line line = new Line();
         line.setStartX(100);
         line.setStartY(100);
@@ -80,7 +93,7 @@ public class simulation extends Application {
         line.setStrokeWidth(2);
         line.setStroke(Color.GREY);
 
-        // Initialize the triangle (tape head) and add it to the scene
+        // Create a triangle using the Polygon Object to represent tape head
         triangle = new Polygon();
         triangle.getPoints().setAll(
                 25.0, 150.0,
@@ -90,6 +103,7 @@ public class simulation extends Application {
         triangle.setStroke(Color.BLACK);
         triangle.setTranslateX(0);
 
+        // Create a Rectangle Object to create a button
         Rectangle button = new Rectangle();
         button.setX(550);
         button.setY(550);
@@ -100,6 +114,7 @@ public class simulation extends Application {
         button.setFill(Color.LAVENDERBLUSH);
         button.setOpacity(0.5);
 
+        // Create a Text Object to give the rectangle a text "START"
         Text begin = new Text();
         begin.setText("START");
         begin.setX(575);
@@ -107,6 +122,7 @@ public class simulation extends Application {
         begin.setFont(Font.font("Poppins",FontWeight.BOLD, 40));
         begin.setFill(Color.GRAY);
 
+        // Event when button(rectangle) clicked the method runTuringMachine will run
         button.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 System.out.println("Left mouse button clicked on Start button !");
@@ -115,6 +131,7 @@ public class simulation extends Application {
             }
         });
 
+        // Event when text inside button(rectangle) clicked the method runTuringMachine will run
         begin.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY) {
                 System.out.println("Left mouse button clicked on Start button !");
@@ -123,13 +140,17 @@ public class simulation extends Application {
             }
         });
 
+        // Turing Machine should have an infinite amount of tape. Using for loop to create 50 cells ( to show illusion of infinite cells ).
+        int cell_number = 50;
         for (int i = 0; i < cell_number; i++) {
+            int cell_height = 80;
             Rectangle rect = new Rectangle(cell_width * i, 200, cell_width, cell_height);
             rect.setFill(Color.WHITE);
             rect.setStroke(Color.BLACK);
             root.getChildren().add(rect);
         }
 
+        // Using for loop to take each of the symbol inside the input list to place in the tape
         for (int i = 0; i < inputList.size(); i++) {
             String symbol = inputList.get(i);
             Text input_tape = new Text(cell_width * i + 30, 250, symbol);
@@ -138,16 +159,20 @@ public class simulation extends Application {
             inputTapeNodes.add(input_tape);
         }
 
+        // Set the screen title and dimensions
         stage.setTitle("Turing Machine Simulation");
         stage.setWidth(1280);
         stage.setHeight(720);
         stage.setResizable(false);
 
+        // Add UI components (Objects) to the root (Group object)
         root.getChildren().add(text);
         root.getChildren().add(line);
         root.getChildren().add(triangle);
         root.getChildren().add(button);
         root.getChildren().add(begin);
+
+        // Set the scene and display it on the stage
         stage.setScene(scene);
         stage.show();
     }
@@ -195,7 +220,7 @@ public class simulation extends Application {
                 root.getChildren().removeAll(inputTapeNodes);
                 inputTapeNodes.clear();
 
-                // Update the UI with the new tape content
+                // Update UI and change input in the tape
                 for (int i = 0; i < inputList.size(); i++) {
                     String newSymbol = inputList.get(i);
                     Text input_tape = new Text(cell_width * i + 30, 250, newSymbol);
@@ -204,6 +229,7 @@ public class simulation extends Application {
                     inputTapeNodes.add(input_tape);
                 }
 
+                // Update tape head (Triangle) position following the tape hade position
                 triangle.setTranslateX(head_position * cell_width);
 
                 // Continue the loop if not halted
@@ -215,7 +241,6 @@ public class simulation extends Application {
             }
         });
 
-        // Start the first iteration
         pause.play();
     }
 }
