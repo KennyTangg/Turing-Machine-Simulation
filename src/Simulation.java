@@ -80,6 +80,7 @@ public class simulation extends Application {
         line.setStrokeWidth(2);
         line.setStroke(Color.GREY);
 
+        // Initialize the triangle (tape head) and add it to the scene
         triangle = new Polygon();
         triangle.getPoints().setAll(
                 25.0, 150.0,
@@ -110,7 +111,7 @@ public class simulation extends Application {
             if (event.getButton() == MouseButton.PRIMARY) {
                 System.out.println("Left mouse button clicked on Start button !");
                 button.setFill(Color.LIGHTGREEN);
-                runTuringMachine(transition, root, inputTapeNodes);
+                runTuringMachine(transition, root, inputTapeNodes, begin, button);
             }
         });
 
@@ -118,7 +119,7 @@ public class simulation extends Application {
             if (event.getButton() == MouseButton.PRIMARY) {
                 System.out.println("Left mouse button clicked on Start button !");
                 button.setFill(Color.LIGHTGREEN);
-                runTuringMachine(transition, root, inputTapeNodes);
+                runTuringMachine(transition, root, inputTapeNodes, begin, button);
             }
         });
 
@@ -151,13 +152,15 @@ public class simulation extends Application {
         stage.show();
     }
 
-    public void runTuringMachine(Map<String, Map<String, List<String>>> transition, Group root, List<Text> inputTapeNodes) {
+    public void runTuringMachine(Map<String, Map<String, List<String>>> transition, Group root, List<Text> inputTapeNodes, Text begin, Rectangle button) {
         // Remove existing tape nodes and clear the list
         root.getChildren().removeAll(inputTapeNodes);
+        root.getChildren().remove(begin);
+        root.getChildren().remove(button);
         inputTapeNodes.clear();
 
         // Create a PauseTransition for the delay
-        PauseTransition pause = new PauseTransition(Duration.seconds(0.3)); // 1 second delay
+        PauseTransition pause = new PauseTransition(Duration.seconds(0.4)); // 0.4 second / 400ms  delay
         pause.setOnFinished(event -> {
             try {
                 if (current_state.equals(accept_state)) {
